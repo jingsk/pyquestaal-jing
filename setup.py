@@ -14,7 +14,7 @@ setup(
     description="Python class to interface with QUESTAAL Quantum codes which is a suite of electronic structure programs.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/santoshkumarradha/pyquestaal",
+    url="https://github.com/jingsk/pyquestaal-jing.git",
     author="Santosh Kumar Radha",
     author_email="srr70@case.edu",
     classifiers=[  # Optional
@@ -31,5 +31,5 @@ setup(
     ],
     packages=find_packages(),
     python_requires=">=3.6, <4",
-    install_requires=["numpy>=1.22.4","ase>=3.21"],
+    install_requires=["numpy>=1.22.4","ase>=3.21","cif2cell>=2.0.0a3"],
 )
