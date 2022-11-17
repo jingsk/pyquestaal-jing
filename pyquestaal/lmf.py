@@ -184,7 +184,7 @@ class lmf:
 
         self.update(atoms)
 #        self.mksyml(kpts)
-        from syml import write_syml
+        from pyquestaal.syml import write_syml
         write_syml(kpath,name=self.ctrl)
         temp_cmd = self.mpi(
             self.p) + " lmf -vnit=1 --band~mq~qp~fn=syml " + self.ctrl
