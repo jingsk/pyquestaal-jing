@@ -148,44 +148,46 @@ class lmf:
             if not self.silent:
                 print("done\n")
 
-    def mksyml(self, kpts=41):
+#    def mksyml(self, kpts=41):
+#
+#        import os.path
+#        if os.path.isfile("syml." + self.ctrl) == False:
+#            import subprocess
+#            import os
+#
+#            def is_tool(name):
+#                try:
+#                    devnull = open(os.devnull)
+#                    subprocess.Popen([name], stdout=devnull,
+#                                     stderr=devnull).communicate()
+#                except OSError as e:
+#                    if e.errno == os.errno.ENOENT:
+#                        return False
+#                return True
+#
+#            if is_tool("mksyml.py") == False:
+#                print(
+#                    "Make sure mksyml.py is installed. check https://github.com/santoshkumarradha/Quantum-condensed-matter-projects/tree/master/plotting%20bands for more information on how to install"
+#                )
+#            else:
+#                temp_cmd = "mksyml.py -kpts=" + str(kpts) + " -c=" + self.ctrl
+#                if not self.silent:
+#                    print("running " + temp_cmd + "......")
+#                out, err = self.runcmd(temp_cmd)
+#                if not self.silent:
+#                    print("done\n")
+#                import os.path
+#                if os.path.isfile("syml." + self.ctrl) == False:
+#                    self.can_run_bands = False
 
-        import os.path
-        if os.path.isfile("syml." + self.ctrl) == False:
-            import subprocess
-            import os
-
-            def is_tool(name):
-                try:
-                    devnull = open(os.devnull)
-                    subprocess.Popen([name], stdout=devnull,
-                                     stderr=devnull).communicate()
-                except OSError as e:
-                    if e.errno == os.errno.ENOENT:
-                        return False
-                return True
-
-            if is_tool("mksyml.py") == False:
-                print(
-                    "Make sure mksyml.py is installed. check https://github.com/santoshkumarradha/Quantum-condensed-matter-projects/tree/master/plotting%20bands for more information on how to install"
-                )
-            else:
-                temp_cmd = "mksyml.py -kpts=" + str(kpts) + " -c=" + self.ctrl
-                if not self.silent:
-                    print("running " + temp_cmd + "......")
-                out, err = self.runcmd(temp_cmd)
-                if not self.silent:
-                    print("done\n")
-                import os.path
-                if os.path.isfile("syml." + self.ctrl) == False:
-                    self.can_run_bands = False
-
-    def plot_bands(self, atoms, kpts=41):
+    def plot_bands(self, atoms, kpath):
 
         self.update(atoms)
-        self.mksyml(kpts)
+#        self.mksyml(kpts)
+        from syml import write_syml
+        write_syml(kpath,name=self.ctrl)
         temp_cmd = self.mpi(
-            self.p) + " lmf -vnit=1 --band~mq~fn=syml " + self.ctrl
+            self.p) + " lmf -vnit=1 --band~mq~qp~fn=syml " + self.ctrl
         if not self.silent:
             print("running " + temp_cmd + "......")
         out, err = self.runcmd(temp_cmd)
