@@ -4,6 +4,9 @@ from ase.io import iread, write
 import subprocess
 import numpy as np
 import warnings
+from pyquestaal.syml import write_syml
+import os.path
+from ase.dft.band_structure import BandStructure
 
 class lmf:
 
@@ -148,82 +151,25 @@ class lmf:
             if not self.silent:
                 print("done\n")
 
-#    def mksyml(self, kpts=41):
-#
-#        import os.path
-#        if os.path.isfile("syml." + self.ctrl) == False:
-#            import subprocess
-#            import os
-#
-#            def is_tool(name):
-#                try:
-#                    devnull = open(os.devnull)
-#                    subprocess.Popen([name], stdout=devnull,
-#                                     stderr=devnull).communicate()
-#                except OSError as e:
-#                    if e.errno == os.errno.ENOENT:
-#                        return False
-#                return True
-#
-#            if is_tool("mksyml.py") == False:
-#                print(
-#                    "Make sure mksyml.py is installed. check https://github.com/santoshkumarradha/Quantum-condensed-matter-projects/tree/master/plotting%20bands for more information on how to install"
-#                )
-#            else:
-#                temp_cmd = "mksyml.py -kpts=" + str(kpts) + " -c=" + self.ctrl
-#                if not self.silent:
-#                    print("running " + temp_cmd + "......")
-#                out, err = self.runcmd(temp_cmd)
-#                if not self.silent:
-#                    print("done\n")
-#                import os.path
-#                if os.path.isfile("syml." + self.ctrl) == False:
-#                    self.can_run_bands = False
 
-    def plot_bands(self, atoms, kpath):
+    def calculate_bands(self, atoms, kpath):
 
         self.update(atoms)
 #        self.mksyml(kpts)
-        from pyquestaal.syml import write_syml
         write_syml(kpath,name=self.ctrl)
-        temp_cmd = self.mpi(
-            self.p) + " lmf -vnit=1 --band~mq~qp~fn=syml " + self.ctrl
+        temp_cmd = self.mpi(self.p) + " lmf -vnit=1 --band~mq~qp~fn=syml " + self.ctrl
         if not self.silent:
             print("running " + temp_cmd + "......")
         out, err = self.runcmd(temp_cmd)
         if not self.silent:
             print("done\n")
-        import os.path
         if os.path.isfile("bnds." + self.ctrl) == False:
             self.can_run_bands = False
-
-        import subprocess
-        import os
-
-        def is_tool(name):
-            try:
-                devnull = open(os.devnull)
-                subprocess.Popen([name], stdout=devnull,
-                                 stderr=devnull).communicate()
-            except OSError as e:
-                if e.errno == os.errno.ENOENT:
-                    return False
-            return True
-
-        if is_tool("plotquestaal.py") == False:
-            print(
-                "Make sure plotquestaal.py is installed. check https://github.com/santoshkumarradha/Quantum-condensed-matter-projects/tree/master/plotting%20bands for more information on how to install"
-            )
-        else:
-            temp_cmd = "plotquestaal.py --bands --erange -6 6 -c=" + self.ctrl
-            if not self.silent:
-                print("running " + temp_cmd + "......")
-            out, err = self.runcmd(temp_cmd)
-            if not self.silent:
-                print("done\n")
-            import os.path
-            if os.path.isfile("plot_bands.png") == False:
-                print("Bands plotted and stored in plot_bands.png")
+	self.read_eigenvalues()
+	#create ase.bs
+	bs = BandStructure(path=kpath,
+                           energies=E_skn,
+                           reference=self.e_fermi)
 
     def calculate(self, atoms, sym=True):
         self.positions = atoms.get_positions().copy()
@@ -332,6 +278,10 @@ class lmf:
         self.update(atoms)
         return self.forces.copy()
 
+    def get_eigenvalues(self, atoms):
+        self.update(atoms)
+        return self.eigenvalues.copy()
+
     # Reading outputs
     def read_forces(self):
 
@@ -348,6 +298,17 @@ class lmf:
         for i in open("output", 'r'):
             if "Fermi" in i:
                 self.e_fermi = float(i.split(";")[0].split(":")[-1])
+
+    def read_eigenvalues(self):
+    	file = "bnds." + self.ctrl
+        with open(file) as f:
+            #ignore the first line
+            line = f.readline().split()
+            #comment = rows 100 cols 53  efermi=0.175044  nsp=1
+            nrows, ncols, nspins = int(line[2]), int(line[4]), int(line[6][-1])
+            #get rid of \n, spaces, reshape, and remove kpts strings
+            E_skn = np.array(f.read().split(), dtype=float).reshape(nspins,nrows, ncols)[:,:,3:]
+            self.eigenvalues = E_skn
 
     @staticmethod
     def get_error(fname):
