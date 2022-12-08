@@ -168,7 +168,7 @@ class lmf:
         self.read_eigenvalues()
         #create ase.bs
         bs = BandStructure(path=kpath,
-                           energies=E_skn,
+                           energies=self.eigenvalues,
                            reference=self.e_fermi)
         bs.write(self.ctrl+'_bs.json')
 
