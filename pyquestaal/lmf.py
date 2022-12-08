@@ -7,6 +7,7 @@ import warnings
 from pyquestaal.syml import write_syml
 import os.path
 from ase.spectrum.band_structure import BandStructure
+from ase.units import Ry, Bohr
 
 class lmf:
 
@@ -170,6 +171,7 @@ class lmf:
         bs = BandStructure(path=kpath,
                            energies=self.eigenvalues,
                            reference=self.e_fermi)
+                           #reference=0)
         bs.write(self.ctrl+'_bs.json')
 
     def calculate(self, atoms, sym=True):
@@ -294,11 +296,12 @@ class lmf:
             self.forces[i, 0] = float(lines[i].split()[0])
             self.forces[i, 1] = float(lines[i].split()[1])
             self.forces[i, 2] = float(lines[i].split()[2])
+        self.forces *= Ry /Bohr
 
     def read_efermi(self):
         for i in open("output", 'r'):
             if "Fermi" in i:
-                self.e_fermi = float(i.split(";")[0].split(":")[-1])
+                self.e_fermi = Ry * float(i.split(";")[0].split(":")[-1])
 
     def read_eigenvalues(self):
         file = "bnds." + self.ctrl
@@ -308,7 +311,7 @@ class lmf:
             #comment = rows 100 cols 53  efermi=0.175044  nsp=1
             nrows, ncols, nspins = int(line[2]), int(line[4]), int(line[6][-1])
             #get rid of \n, spaces, reshape, and remove kpts strings
-            E_skn = np.array(f.read().split(), dtype=float).reshape(nspins,nrows, ncols)[:,:,3:]
+            E_skn = Ry*np.array(f.read().split(), dtype=float).reshape(nspins,nrows, ncols)[:,:,3:]
             self.eigenvalues = E_skn
 
     @staticmethod
@@ -325,4 +328,4 @@ class lmf:
     def read_potential(self):
         for i in open("save." + self.ctrl, 'r'):
             if "c" in i or "C" in i:
-                self.etotal = float(i.split()[-1].split("=")[-1])
+                self.etotal = Ry * float(i.split()[-1].split("=")[-1])
