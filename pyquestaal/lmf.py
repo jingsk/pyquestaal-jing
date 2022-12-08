@@ -301,7 +301,7 @@ class lmf:
                 self.e_fermi = float(i.split(";")[0].split(":")[-1])
 
     def read_eigenvalues(self):
-    	file = "bnds." + self.ctrl
+	file = "bnds." + self.ctrl
         with open(file) as f:
             #ignore the first line
             line = f.readline().split()
