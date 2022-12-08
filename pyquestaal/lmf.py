@@ -165,12 +165,12 @@ class lmf:
             print("done\n")
         if os.path.isfile("bnds." + self.ctrl) == False:
             self.can_run_bands = False
-	self.read_eigenvalues()
-	#create ase.bs
-	bs = BandStructure(path=kpath,
+        self.read_eigenvalues()
+        #create ase.bs
+        bs = BandStructure(path=kpath,
                            energies=E_skn,
                            reference=self.e_fermi)
-	bs.write(self.ctrl+'_bs.json')
+        bs.write(self.ctrl+'_bs.json')
 
     def calculate(self, atoms, sym=True):
         self.positions = atoms.get_positions().copy()
