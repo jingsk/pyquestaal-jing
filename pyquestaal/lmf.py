@@ -6,7 +6,7 @@ import numpy as np
 import warnings
 from pyquestaal.syml import write_syml
 import os.path
-from ase.dft.band_structure import BandStructure
+from ase.spectrum.band_structure import BandStructure
 
 class lmf:
 
@@ -170,6 +170,7 @@ class lmf:
 	bs = BandStructure(path=kpath,
                            energies=E_skn,
                            reference=self.e_fermi)
+	bs.write(self.ctrl+'_bs.json')
 
     def calculate(self, atoms, sym=True):
         self.positions = atoms.get_positions().copy()
