@@ -312,7 +312,7 @@ class lmf:
             #comment = rows 100 cols 53  efermi=0.175044  nsp=1
             nrows, ncols, nspins = int(line[2]), int(line[4]), int(line[6][-1])
             #get rid of \n, spaces, reshape, and remove kpts strings
-            E_ksn = Ry*np.array(f.read().split(), dtype=float).reshape(nrows/nspins,nspins, ncols)[:,:,3:]
+            E_ksn = Ry*np.array(f.read().split(), dtype=float).reshape(nrows//nspins,nspins, ncols)[:,:,3:]
             E_skn = np.swapaxes(E_ksn,0,1)
             self.eigenvalues = E_skn
 
